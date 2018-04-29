@@ -1,3 +1,6 @@
+import itertools
+import operator
+
 import cv2
 import numpy as np
 import copy
@@ -5,6 +8,7 @@ import math
 import time
 import csv
 from sklearn.neighbors import KNeighborsClassifier
+from collections import deque
 from sklearn import svm
 import pyautogui
 from sklearn.decomposition import PCA
@@ -754,6 +758,23 @@ def calculate_fingers(res, hull_p, drawing):  # -> finished bool, cnt: finger co
             return True, cnt, center, fangle
     return False, 0, None, None
 
+def most_common(L):
+  # get an iterable of (item, iterable) pairs
+  SL = sorted((x, i) for i, x in enumerate(L))
+  # print 'SL:', SL
+  groups = itertools.groupby(SL, key=operator.itemgetter(0))
+  # auxiliary function to get "quality" for an item
+  def _auxfun(g):
+    item, iterable = g
+    count = 0
+    min_index = len(L)
+    for _, where in iterable:
+      count += 1
+      min_index = min(min_index, where)
+    # print 'item %r, count %r, minind %r' % (item, count, min_index)
+    return count, -min_index
+  # pick the highest-count/earliest item
+  return max(groups, key=_auxfun)[0]
 
 # Camera
 camera = cv2.VideoCapture(0)
@@ -764,6 +785,9 @@ cv2.createTrackbar('trh1', 'trackbar', threshold, 255, threshold_change)
 # last_time = time.time()
 finger_point_pos = None
 finger_angle_pos = None
+
+last_predict = deque([0, 0, 0])
+prev = 0
 
 while camera.isOpened():
     ret, frame = camera.read()
@@ -858,7 +882,16 @@ while camera.isOpened():
                         coords2[3][0],
                         coords2[3][1]
                     ]
-                    print(clf.predict([coords]))
+                    last_predict.popleft()
+                    last_predict.append(clf.predict([coords]))
+                    pred = most_common(last_predict)
+                    # print(pred)
+                    if prev != pred:
+                        prev = pred
+                        if prev == 0 and pred == 5:
+                            pyautogui.press('space')
+                        print(pred)
+                    # print(clf.predict([coords]))
                     # print(neigh.predict([coords]))
                     # print(neigh.predict_proba([coords]))
             cv2.imshow('output', drawing)
