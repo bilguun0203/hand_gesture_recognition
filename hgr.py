@@ -5,6 +5,7 @@ import math
 import time
 import csv
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn import svm
 import pyautogui
 from sklearn.decomposition import PCA
 
@@ -638,8 +639,10 @@ tdata = [
 ]
 # tdata = np.load("dump")
 tlabel = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5]
-neigh = KNeighborsClassifier(n_neighbors=10)
-neigh.fit(tdata, tlabel)
+clf = svm.SVC(kernel='linear', C=1.0)
+clf.fit(tdata, tlabel)
+# neigh = KNeighborsClassifier(n_neighbors=10)
+# neigh.fit(tdata, tlabel)
 
 def threshold_change(thr):
     print("[INFO] Changed threshold to " + str(thr))
@@ -855,7 +858,8 @@ while camera.isOpened():
                         coords2[3][0],
                         coords2[3][1]
                     ]
-                    print(neigh.predict([coords]))
+                    print(clf.predict([coords]))
+                    # print(neigh.predict([coords]))
                     # print(neigh.predict_proba([coords]))
             cv2.imshow('output', drawing)
 
