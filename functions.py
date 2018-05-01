@@ -23,6 +23,16 @@ def min_by_col(li, col):
     return minn
 
 
+def center(li):
+    centerpos = [0, 0]
+    try:
+        centerpos[0] = int(sum(row[0] for row in li) / 7)
+        centerpos[1] = int(sum(row[1] for row in li) / 7)
+    except Exception:
+        pass
+    return centerpos
+
+
 def most_common(L):
     # get an iterable of (item, iterable) pairs
     SL = sorted((x, i) for i, x in enumerate(L))

@@ -4,6 +4,7 @@ import copy
 import time
 from collections import deque
 import pyautogui
+##
 import data
 import functions as func
 import save_data as save
@@ -22,6 +23,9 @@ blur_val_2 = 3
 bgImg = np.zeros((480, 640), np.uint8)
 # Is background captured
 isBgCaptured = False
+
+status_mouse = False
+status_dino = False
 
 capture = 0
 
@@ -45,6 +49,7 @@ finger_angle_pos = None
 
 last_predict = deque([0, 0, 0])
 prev = 0
+prevCenter = [0, 0]
 
 while camera.isOpened():
     ret, frame = camera.read()
@@ -97,53 +102,65 @@ while camera.isOpened():
                     min_point_a = [func.min_by_col(finger_angle_pos, 0), func.min_by_col(finger_angle_pos, 1)]
                     max_point_f = [func.max_by_col(finger_point_pos, 0), func.max_by_col(finger_point_pos, 1)]
                     max_point_a = [func.max_by_col(finger_angle_pos, 0), func.max_by_col(finger_angle_pos, 1)]
-                    topLeft = [
-                        int(min_point_a[0] if min_point_f[0] > min_point_a[0] else min_point_f[0]),
-                        int(min_point_a[1] if min_point_f[1] > min_point_a[1] else min_point_f[1])
-                    ]
-                    bottomRight = [
-                        int(max_point_a[0] if max_point_f[0] < max_point_a[0] else max_point_f[0]),
-                        int(max_point_a[1] if max_point_f[1] < max_point_a[1] else max_point_f[1])
-                    ]
+                    # topLeft = [
+                    #     int(min_point_a[0] if min_point_f[0] > min_point_a[0] else min_point_f[0]),
+                    #     int(min_point_a[1] if min_point_f[1] > min_point_a[1] else min_point_f[1])
+                    # ]
+                    # bottomRight = [
+                    #     int(max_point_a[0] if max_point_f[0] < max_point_a[0] else max_point_f[0]),
+                    #     int(max_point_a[1] if max_point_f[1] < max_point_a[1] else max_point_f[1])
+                    # ]
+
+                    centerPos = func.center(finger_point_pos)
+                    cv2.circle(drawing, (centerPos[0], centerPos[1]), 5, [255, 0, 0], 1)
+                    if status_mouse:
+                        delta = [a_i - b_i for a_i, b_i in zip(prevCenter, centerPos)]
+                        # mouse = PyMouse()
+                        # mPos = mouse.position()
+                        # pyautogui.moveTo(mPos[0]+delta[0], mPos[1]+delta[1])
+                        pyautogui.FAILSAFE = False
+                        pyautogui.moveRel(abs(-delta[0]*2), abs(-delta[1]*2))
+                    prevCenter = centerPos
+
                     # hand = cropped_img[topLeft[0]:bottomRight[0], topLeft[1]:bottomRight[1]]
                     finger_point_pos = list(map(lambda x: [x[0]-min_point_f[0], x[1]-min_point_f[1]], finger_point_pos))
                     finger_angle_pos = list(map(lambda x: [x[0] - min_point_a[0], x[1] - min_point_a[1]], finger_angle_pos))
-                    coords1 = finger_point_pos
-                    coords2 = finger_angle_pos
-                    while len(coords1) < 7:
-                        coords1.append([0, 0])
-                    while len(coords2) < 4:
-                        coords2.append([0, 0])
+                    # coords1 = finger_point_pos
+                    # coords2 = finger_angle_pos
+                    while len(finger_point_pos) < 7:
+                        finger_point_pos.append([0, 0])
+                    while len(finger_angle_pos) < 4:
+                        finger_angle_pos.append([0, 0])
                     coords = [
-                        coords1[0][0],
-                        coords1[0][1],
-                        coords1[1][0],
-                        coords1[1][1],
-                        coords1[2][0],
-                        coords1[2][1],
-                        coords1[3][0],
-                        coords1[3][1],
-                        coords1[4][0],
-                        coords1[4][1],
-                        coords1[5][0],
-                        coords1[5][1],
-                        coords1[6][0],
-                        coords1[6][1],
-                        coords2[0][0],
-                        coords2[0][1],
-                        coords2[1][0],
-                        coords2[1][1],
-                        coords2[2][0],
-                        coords2[2][1],
-                        coords2[3][0],
-                        coords2[3][1]
+                        finger_point_pos[0][0],
+                        finger_point_pos[0][1],
+                        finger_point_pos[1][0],
+                        finger_point_pos[1][1],
+                        finger_point_pos[2][0],
+                        finger_point_pos[2][1],
+                        finger_point_pos[3][0],
+                        finger_point_pos[3][1],
+                        finger_point_pos[4][0],
+                        finger_point_pos[4][1],
+                        finger_point_pos[5][0],
+                        finger_point_pos[5][1],
+                        finger_point_pos[6][0],
+                        finger_point_pos[6][1],
+                        finger_angle_pos[0][0],
+                        finger_angle_pos[0][1],
+                        finger_angle_pos[1][0],
+                        finger_angle_pos[1][1],
+                        finger_angle_pos[2][0],
+                        finger_angle_pos[2][1],
+                        finger_angle_pos[3][0],
+                        finger_angle_pos[3][1]
                     ]
                     last_predict.popleft()
                     last_predict.append(data.clf.predict([coords]))
                     pred = func.most_common(last_predict)
                     # print(pred)
                     if prev != pred:
-                        if prev == 0 and pred == 5:
+                        if prev == 0 and pred == 5 and status_dino:
                             pyautogui.press('space')
                         prev = pred
                         print(pred)
@@ -156,6 +173,12 @@ while camera.isOpened():
     if k == 27 or k == ord('q'):
         save.csvfile.close()
         break
+    elif k == ord('m'):
+        status_mouse = not status_mouse
+        status_dino = False
+    elif k == ord('d'):
+        status_dino = not status_dino
+        status_mouse = False
     elif k == ord('b'):
         bgImg = cropped_img
         isBgCaptured = 1
