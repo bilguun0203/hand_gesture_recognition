@@ -158,6 +158,8 @@ while camera.isOpened():
                     last_predict.popleft()
                     last_predict.append(data.clf.predict([coords]))
                     pred = func.most_common(last_predict)
+                    font = cv2.FONT_HERSHEY_SIMPLEX
+                    cv2.putText(drawing, str(pred), (10, 40), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
                     # print(pred)
                     if prev != pred:
                         if prev == 0 and pred == 5 and status_dino:
