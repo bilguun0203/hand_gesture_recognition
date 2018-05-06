@@ -23,6 +23,8 @@ blur_val_2 = 3
 bgImg = np.zeros((480, 640), np.uint8)
 # Is background captured
 isBgCaptured = False
+# Is in data collection mode ?
+train = False
 
 status_mouse = False
 status_dino = False
@@ -31,6 +33,9 @@ capture = 0
 
 # neigh = KNeighborsClassifier(n_neighbors=10)
 # neigh.fit(tdata, tlabel)
+
+if train:
+    save.save_init()
 
 
 def threshold_change(thr):
@@ -173,7 +178,8 @@ while camera.isOpened():
 
     k = cv2.waitKey(5)
     if k == 27 or k == ord('q'):
-        save.csvfile.close()
+        if train:
+            save.csvfile.close()
         break
     elif k == ord('m'):
         status_mouse = not status_mouse
@@ -185,29 +191,28 @@ while camera.isOpened():
         bgImg = cropped_img
         isBgCaptured = 1
         print('[INFO] Background Captured')
-    elif k == ord('0'):
-        save.save_data(capture, finger_point_pos, finger_angle_pos, 0, thresh)
-        capture += 1
-    elif k == ord('1'):
-        save.save_data(capture, finger_point_pos, finger_angle_pos, 1, thresh)
-        capture += 1
-    elif k == ord('2'):
-        save.save_data(capture, finger_point_pos, finger_angle_pos, 2, thresh)
-        capture += 1
-    elif k == ord('3'):
-        save.save_data(capture, finger_point_pos, finger_angle_pos, 3, thresh)
-        capture += 1
-    elif k == ord('4'):
-        save.save_data(capture, finger_point_pos, finger_angle_pos, 4, thresh)
-        capture += 1
-    elif k == ord('5'):
-        save.save_data(capture, finger_point_pos, finger_angle_pos, 5, thresh)
-        capture += 1
-    elif k == ord('c'):
-        save.save_data(capture, finger_point_pos, finger_angle_pos, 99, thresh)
-        capture += 1
-    elif k == ord('n'):
-        print('[INFO] Background Captured')
+    if train:
+        if k == ord('0'):
+            save.save_data(capture, finger_point_pos, finger_angle_pos, 0, thresh)
+            capture += 1
+        elif k == ord('1'):
+            save.save_data(capture, finger_point_pos, finger_angle_pos, 1, thresh)
+            capture += 1
+        elif k == ord('2'):
+            save.save_data(capture, finger_point_pos, finger_angle_pos, 2, thresh)
+            capture += 1
+        elif k == ord('3'):
+            save.save_data(capture, finger_point_pos, finger_angle_pos, 3, thresh)
+            capture += 1
+        elif k == ord('4'):
+            save.save_data(capture, finger_point_pos, finger_angle_pos, 4, thresh)
+            capture += 1
+        elif k == ord('5'):
+            save.save_data(capture, finger_point_pos, finger_angle_pos, 5, thresh)
+            capture += 1
+        elif k == ord('c'):
+            save.save_data(capture, finger_point_pos, finger_angle_pos, 99, thresh)
+            capture += 1
     # print (1 / (time.time() - last_time))
     last_time = time.time()
 
