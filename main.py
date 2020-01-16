@@ -82,7 +82,7 @@ while camera.isOpened():
             cv2.imshow('blur thresh', thresh)
 
             thresh1 = copy.deepcopy(thresh)
-            im2, contours, hierarchy = cv2.findContours(thresh1, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            contours, hierarchy = cv2.findContours(thresh1, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             length = len(contours)
             maxArea = -1
             drawing = np.zeros(img.shape, np.uint8)

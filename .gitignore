@@ -1,3 +1,6 @@
-captures
+captures*
+captures/*
 .idea
-sample-0.csv
+sample-*.csv
+.venv
+__pycache__
