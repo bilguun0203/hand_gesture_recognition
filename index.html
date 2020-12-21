@@ -1,0 +1,309 @@
+<!-- theprojecthciepz.com -->
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Хүн компьютерийн харилцаа - Hand Gesture Recognition</title>
+
+		<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i&amp;subset=cyrillic,cyrillic-ext" rel="stylesheet">
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/custom.css">
+		<link rel="stylesheet" href="../../../assets/css/fa-svg-with-js.css">
+
+		<!-- Print -->
+		<!-- <link rel="stylesheet" href="css/print/pdf.css"> -->
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section id="cover">
+					<h2>Гарын хэлбэр таних</h2>
+					<p>Hand Gesture Recognition</p>
+				</section>
+				<section id="goal">
+					<h2>Зорилго</h2>
+					Камераар дамжуулан гарын ямар хэлбэр гаргасан буюу хэдэн хуруу гаргасныг машин сургалтын аргаар таньж, түүнийгээ хялбар тоглоомонд ашиглах.
+				</section>
+				<section id="computer-vision">
+					<h2>Таних үйл ажиллагаа</h2>
+					<ol>
+						<li>Зураг хүлээж авах</li>
+						<li>Зураг боловсруулах</li>
+						<li>Шинж чанаруудыг ялгаж авах</li>
+						<li>Таних</li>
+						<li>Шийдвэр гаргах</li>
+					</ol>
+				</section>
+				<section id="goal-main">
+					<section id="technology">
+						<h2>Ашигласан технологи</h2>
+						<ul>
+							<li>Python</li>
+							<li>OpenCV (Open Source Computer Vision Library)</li>
+							<li>scikit-learn (Machine Learning in Python)</li>
+							<li>Numpy (Fundamental package for scientific computing with Python)</li>
+							<li>PyAutoGUI (GUI automation for human beings)</li>
+						</ul>
+					</section>
+					<section id="computer-vision-step">
+						<h2>Ашигласан технологи</h2>
+						<ol>
+							<li>Зураг хүлээж авах<span class="fragment highlight-red-inverse"> - Камер</span></li>
+							<li>Зураг боловсруулах<span class="fragment highlight-purple-inverse"> - OpenCV</span></li>
+							<li>Шинж чанаруудыг ялгаж авах<span class="fragment highlight-indigo-inverse"> - OpenCV</span></li>
+							<li>Таних<span class="fragment highlight-teal-inverse"> - scikit-learn SVM</span></li>
+							<li>Шийдвэр гаргах<span class="fragment highlight-green-inverse"> - Тоглоом/PyAutoGUI</span></li>
+						</ol>
+					</section>
+				</section>
+				<section>
+					<h2>Зураг хүлээж авах</h2>
+					<p>Камераар хүлээн авч буй зургуудыг ашиглах бөгөөд танилтыг сайжруулахын тулд гар нь орчноос өөр өнгөтэй байх хэрэгтэй.</p>
+					<pre>
+						<code data-trim>
+							# OpenCV
+							import cv2
+
+							cap = cv2.VideoCapture(0)
+							while True:
+								ret, img = cap.read()
+						</code>
+					</pre>
+					<small>Камернаас зураг унших (OpenCV)</small>
+				</section>
+				<section id="image-processing">
+					<section id="image-processing-intro">
+						<h2>Зураг боловсруулах</h2>
+						<table>
+							<tr>
+								<td class="fragment no-padding">
+									<img src="images/im_bg.png" height="203" width="170" />
+									Арын фон
+								</td>
+								<td class="fragment"><i class="far fa-arrow-right"></i><br /></td>
+								<td class="fragment no-padding">
+									<img src="images/im_hand.png" height="203" width="170" />
+									Үндсэн зураг
+								</td>
+								<td class="fragment"><i class="far fa-arrow-right"></i><br /></td>
+								<td class="fragment no-padding">
+									<img src="images/im_removed_bg.png" height="203" width="170" />
+									Арын фоныг хассан
+								</td>
+								<td class="fragment"><i class="far fa-arrow-right"></i><br /></td>
+								<td class="fragment no-padding">
+									<img src="images/im_threshold.png" height="203" width="170" />
+									Зааглах
+								</td>
+							</tr>
+						</table>
+					</section>
+					<section id="image-processing-code">
+						<pre class="python">
+							<code data-trim>
+								# Background
+								img = cv2.absdiff(bgImg, image)
+								# Gray
+								gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+								# Gaussian Blur
+								blur = cv2.GaussianBlur(gray, (11, 11), 0)
+								# Threshold
+								ret, thresh = cv2.threshold(blur, threshold, 255, cv2.THRESH_BINARY)
+								# Gaussian Blur
+								thresh = cv2.GaussianBlur(thresh, (3, 3), 0)
+							</code>
+						</pre>
+					</section>
+				</section>
+				<section id="feature-extraction">
+					<section id="feature-extraction-intro">
+						<h2>Шинж чанаруудыг ялгах</h2>
+						<table>
+							<tr>
+								<td>
+									<center>
+										<img src="images/im_detected.png" class="stretch" />
+									</center>
+								</td>
+							</tr>
+							<tr>
+								<td>Гарын өнцгүүд дээрх <span class="highlight-red-inverse">X, Y</span> координатуудыг олох</td>
+							</tr>
+							<tr>
+								<td style="text-align: center;"><small>Countours | Convex hull | Convexity defects</small></td>
+							</tr>
+						</table>
+					</section>
+					<section id="feature_extraction-code">
+						<pre class="python">
+							<code data-trim>
+								cv2.findContours()
+
+								cv2.convexHull()
+
+								cv2.convexityDefects()
+							</code>
+						</pre>
+					</section>
+				</section>
+				<section id="machine-learning">
+					<section id="machine-learning-intro">
+						<h2>Таних</h2>
+						<p>Зурагнаас олж буй шинж чанаруудыг гарын хөдөлгөөн бүрт хадгалан нийт 300 ширхэг жишээ өгөгдөл цуглуулсан.</p>
+						<img src="images/train_images.png" class="stretch" />
+					</section>
+					<section id="machine-learning-svm">
+						<img src="images/data_table.png" class="stretch" />
+						<p>Цуглуулсан өгөгдлүүдээ SVM (Support vector machine) машин сургалтын аргыг ашиглан сургаж, танилтанд ашигласан.</p>
+					</section>
+					<section id="machine-learning-code">
+						<pre class="python">
+							<code data-trim>
+								# scikit-learn svm
+								from sklearn import svm
+
+								# Train data
+								tdata = [[...],[...]...]
+								tlabel = [...]
+								clf = svm.SVC(kernel='linear', C=1.0)
+								clf.fit(tdata, tlabel)
+
+								# Predict
+								clf.predict([coords])
+							</code>
+						</pre>
+					</section>
+				</section>
+				<section id="decision">
+					<section id="decision-intro">
+						<h2>Шийдвэр гаргах</h2>
+						<p>Зурагнаас таньсан дүрснээс хамаарч тоглоомонд зохих үйлдлүүдийг хийх</p>
+						<img class="fragment" src="images/dino.png" />
+					</section>
+					<section id="decision-code">
+						<pre class="python">
+							<code data-trim>
+								# PyAutoGUI
+								import pyautogui
+								# Queue
+								last_predict = deque([0, 0, 0])
+								
+								# Play Dino
+								last_predict.popleft()
+								last_predict.append(data.clf.predict([coords]))
+								pred = func.most_common(last_predict)
+								if prev != pred:
+									if prev == 0 and pred == 5 and status_dino:
+										pyautogui.press('space')
+									prev = pred
+							</code>
+						</pre>
+					</section>
+				</section>
+				<section id="demo">
+					<section id="demo_test">
+						<h2>Туршилт</h2>
+						<iframe width="560" height="315" src="https://www.youtube.com/embed/maHPA8VHVEM?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+						<!--<video data-autoplay class="stretch">-->
+							<!--<source data-src="videos/hand_gesture_test.webm" type="video/webm" />-->
+							<!--<source data-src="videos/hand_gesture_test.mp4" type="video/mp4" />-->
+						<!--</video>-->
+					</section>
+					<section id="demo_dino">
+						<h2>Туршилт (Chrome Dino)</h2>
+						<iframe width="560" height="315" src="https://www.youtube.com/embed/ksz7KERGdmE?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+						<!--<video data-autoplay class="stretch">-->
+							<!--<source data-src="videos/hand_gesture_dino.webm" type="video/webm" />-->
+							<!--<source data-src="videos/hand_gesture_dino.mp4" type="video/mp4" />-->
+						<!--</video>-->
+					</section>
+				</section>
+				<section>
+					<h2>Үр дүн</h2>
+					<table>
+						<thead>
+							<tr>
+								<th>Хуруу</th>
+								<th>Танилтын хувь</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>0</td>
+								<td>95%</td>
+							</tr>
+							<tr>
+								<td>1</td>
+								<td>90%</td>
+							</tr>
+							<tr>
+								<td>2</td>
+								<td>70%</td>
+							</tr>
+							<tr>
+								<td>3</td>
+								<td>25%</td>
+							</tr>
+							<tr>
+								<td>4</td>
+								<td>90%</td>
+							</tr>
+							<tr>
+								<td>5</td>
+								<td>100%</td>
+							</tr>
+						</tbody>
+					</table>
+				</section>
+				<section>
+					<h2>Дүгнэлт</h2>
+					<p style="font-size: 0.7em;">
+						Орчин болон гар хоорондоо ялгаатай өнгөтэй үед арын фоныг орж ирж буй зургаас хасахад гарыг бүрэн ялгаж авч чадсан. Threshold хийсэн зургаас findContours, convexHull, convexityDefects функцуудыг ашиглан гарын онцгой цэгүүдийг тооцоолж олсноор тэдгээрийг машин сургалтын SVM аргаар ангилан орж ирсэн зургаас гар ямар хэлбэр гаргаж байгааг олох боломжтой бөгөөд боломжийн үр дүнд хүрсэн. Цааш Convex hull аргаар олсон цэгүүдийг оновчтой хуваарилж, SVM-ын параметрүүдийг өөрчилж, тохиромжтой утгуудыг олсноор танилтыг сайжруулах боломжтой.
+					</p>
+				</section>
+				<section id="end">
+					<h2>Анхаарал тавьсанд баярлалаа</h2>
+				</section>
+			</div>
+		</div>
+
+		<div class="share-reveal" style="color: #b0b0b0; font-family: 'Source Sans Pro', Helvetica, sans-serif; display: block; position: absolute; bottom: 16px; left: 50%; margin-left: -139px; z-index: 20;">
+			<small class="share-reveal-editor">Хүн компьютерийн харилцаа - 2017-2018 - хавар - II баг</small>
+		</div>
+
+		<script src="../../../assets/js/fontawesome-all.min.js"></script>
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				// width: "100%",
+				// height: "100%",
+				// margin: 0,
+				// minScale: 1,
+				// maxScale: 1,
+				pdfMaxPagesPerSlide: 1,
+				controls: false,
+				progress: false,
+				slideNumber: true,
+				transitionSpeed: 'fast',
+				parallaxBackgroundImage: 'images/background.jpg',
+				parallaxBackgroundSize: '1411px 900px',
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
